@@ -38,16 +38,35 @@ const VoidCanvas: React.FC<VoidCanvasProps> = ({
 
   const handleEnd = () => setIsDragging(false);
 
+  // Handle wheel zoom
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    onZoomChange(Math.max(0.1, Math.min(3, zoom * delta)));
+  }, [zoom, onZoomChange]);
+
   useEffect(() => {
     const moveHandler = (e: MouseEvent) => handleMove(e.clientX, e.clientY);
     const upHandler = () => handleEnd();
+    const touchMoveHandler = (e: TouchEvent) => {
+      if (e.touches.length === 1) {
+        e.preventDefault();
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+    const touchEndHandler = () => handleEnd();
+
     if (isDragging) {
       window.addEventListener('mousemove', moveHandler);
       window.addEventListener('mouseup', upHandler);
+      window.addEventListener('touchmove', touchMoveHandler, { passive: false });
+      window.addEventListener('touchend', touchEndHandler);
     }
     return () => {
       window.removeEventListener('mousemove', moveHandler);
       window.removeEventListener('mouseup', upHandler);
+      window.removeEventListener('touchmove', touchMoveHandler);
+      window.removeEventListener('touchend', touchEndHandler);
     };
   }, [isDragging, handleMove]);
 
@@ -67,8 +86,10 @@ const VoidCanvas: React.FC<VoidCanvasProps> = ({
   }
 
   return (
-    <div 
+    <div
       onMouseDown={(e) => e.button === 0 && handleStart(e.clientX, e.clientY)}
+      onTouchStart={(e) => e.touches.length === 1 && handleStart(e.touches[0].clientX, e.touches[0].clientY)}
+      onWheel={handleWheel}
       className={`absolute inset-0 w-full h-full cursor-${isDragging ? 'grabbing' : 'grab'} select-none overflow-hidden touch-none`}
     >
       <div 
@@ -106,19 +127,23 @@ const VoidCanvas: React.FC<VoidCanvasProps> = ({
           const importanceScale = 1 + (fragment.importance - 1) * 0.15;
 
           return (
-            <div 
+            <div
               key={fragment.id}
               onClick={(e) => { e.stopPropagation(); onFragmentSelect(fragment.id); }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Fragment: ${fragment.text.substring(0, 50)}...`}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); onFragmentSelect(fragment.id); } }}
               className={`
-                absolute w-[260px] p-0 rounded-lg border cursor-pointer backdrop-blur-xl transition-all duration-700 pointer-events-auto overflow-hidden
+                absolute w-[220px] md:w-[260px] p-0 rounded-lg border cursor-pointer backdrop-blur-xl transition-all duration-700 pointer-events-auto overflow-hidden
                 ${isFocused ? `${colors.active} shadow-[0_0_80px_rgba(201,169,98,0.2)] z-50` : `${colors.border} z-10`}
                 ${isNeighbor ? 'opacity-90 scale-100' : ''}
                 ${isDimmed ? 'opacity-5 scale-90 grayscale' : 'opacity-100'}
                 ${colors.node}
               `}
-              style={{ 
-                left: `calc(50% + ${fragment.x}px)`, 
-                top: `calc(50% + ${fragment.y}px)`, 
+              style={{
+                left: `calc(50% + ${fragment.x}px)`,
+                top: `calc(50% + ${fragment.y}px)`,
                 transform: `translate(-50%, -50%) scale(${isFocused ? importanceScale * 1.1 : importanceScale})`,
                 transitionProperty: 'transform, opacity, border-color, box-shadow'
               }}
@@ -128,13 +153,13 @@ const VoidCanvas: React.FC<VoidCanvasProps> = ({
                   <img src={fragment.imageUrl} className="w-full h-full object-cover" />
                 </div>
               )}
-              <div className="p-6">
-                <p className={`font-spectral text-sm leading-relaxed ${colors.text} font-light line-clamp-4`}>
+              <div className="p-4 md:p-6">
+                <p className={`font-spectral text-xs md:text-sm leading-relaxed ${colors.text} font-light line-clamp-4`}>
                   {fragment.text}
                 </p>
-                <div className="mt-4 flex items-center justify-between font-mono text-[7px] text-[#8B7355] uppercase tracking-widest opacity-60">
+                <div className="mt-3 md:mt-4 flex items-center justify-between font-mono text-[7px] text-[#8B7355] uppercase tracking-widest opacity-60">
                   <span>{fragment.category}</span>
-                  <span>{fragment.timestamp}</span>
+                  <span className="hidden md:inline">{fragment.timestamp}</span>
                 </div>
               </div>
             </div>

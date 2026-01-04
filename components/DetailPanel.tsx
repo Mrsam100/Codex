@@ -34,10 +34,10 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
 
   return (
     <div className={`
-        fixed top-0 right-0 h-full w-full max-w-[440px] bg-[#121214] border-l border-[#2A2A2C] z-[150] p-10 backdrop-blur-3xl overflow-y-auto shadow-[-50px_0_120px_rgba(0,0,0,0.8)]
+        fixed top-0 right-0 h-full w-full md:max-w-[440px] bg-[#121214] border-l border-[#2A2A2C] z-[150] p-6 md:p-10 backdrop-blur-3xl overflow-y-auto shadow-[-50px_0_120px_rgba(0,0,0,0.8)]
         transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]
     `}>
-      <div className="flex justify-between items-center mb-10">
+      <div className="flex justify-between items-start mb-6 md:mb-10">
         <div className="flex flex-col gap-1">
           <span className="text-[10px] font-mono text-[#C9A962] uppercase tracking-widest">{fragment.category || 'Fragment'}</span>
           <div className="flex items-center gap-2 text-[9px] font-mono text-[#8B7355] uppercase tracking-[0.2em]">
@@ -45,18 +45,19 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
             <span>{fragment.timestamp}</span>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 md:gap-3">
           {!fragment.imageUrl && (
-            <button 
+            <button
               onClick={() => onVisualize(fragment.id)}
-              className="w-8 h-8 rounded-full border border-[#3A3A3C] flex items-center justify-center text-[#C9A962] hover:border-[#C9A962] transition-all"
+              className="w-10 h-10 md:w-8 md:h-8 rounded-full border border-[#3A3A3C] flex items-center justify-center text-[#C9A962] hover:border-[#C9A962] transition-all active:scale-95"
               title="Visualize with AI"
+              aria-label="Visualize with AI"
             >
-              <ImageIcon size={14} />
+              <ImageIcon size={16} className="md:w-[14px] md:h-[14px]" />
             </button>
           )}
-          <button onClick={() => { if(confirm("Erase?")) onDelete(fragment.id); }} className="w-8 h-8 rounded-full border border-[#3A3A3C] flex items-center justify-center text-[#8B7355] hover:text-red-400 transition-all"><Trash2 size={14} /></button>
-          <button onClick={onClose} className="w-8 h-8 rounded-full border border-[#3A3A3C] flex items-center justify-center text-[#8B7355] hover:text-[#F5F2E8] transition-all"><X size={16} /></button>
+          <button onClick={() => { if(confirm("Erase this fragment?")) onDelete(fragment.id); }} className="w-10 h-10 md:w-8 md:h-8 rounded-full border border-[#3A3A3C] flex items-center justify-center text-[#8B7355] hover:text-red-400 transition-all active:scale-95" aria-label="Delete fragment"><Trash2 size={16} className="md:w-[14px] md:h-[14px]" /></button>
+          <button onClick={onClose} className="w-10 h-10 md:w-8 md:h-8 rounded-full border border-[#3A3A3C] flex items-center justify-center text-[#8B7355] hover:text-[#F5F2E8] transition-all active:scale-95" aria-label="Close panel"><X size={18} className="md:w-[16px] md:h-[16px]" /></button>
         </div>
       </div>
 
@@ -69,7 +70,7 @@ const DetailPanel: React.FC<DetailPanelProps> = ({
         )}
 
         <section>
-          <h2 className="font-spectral text-2xl font-light leading-relaxed text-[#F5F2E8]">
+          <h2 className="font-spectral text-xl md:text-2xl font-light leading-relaxed text-[#F5F2E8]">
             {fragment.text}
           </h2>
         </section>
